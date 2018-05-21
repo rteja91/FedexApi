@@ -1,0 +1,46 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Fedex API Application ",
+        "description": "FedexApO",
+        "contact": {
+            "name": "Ravi Teja",
+            "email": "rteja7228@gmail.com"
+        },
+        "license": {
+            "name": "Unlicense"
+        },
+        "version": "1.0"
+    },
+    "host": "fedexapi.corpulse.com",
+    "basePath": "/api",
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {},
+    "definitions": {
+        "Timestamps": {
+            "properties": {
+                "created_at": {
+                    "description": "Creation date",
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2017-03-01 00:00:00"
+                },
+                "updated_at": {
+                    "description": "Last updated",
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2017-03-01 00:00:00"
+                }
+            }
+        }
+    }
+}
