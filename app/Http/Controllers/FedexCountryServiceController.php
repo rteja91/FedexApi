@@ -98,7 +98,7 @@ class FedexCountryServiceController extends Controller
 
             }
 
-        } catch (SoapFault $exception) {
+        } catch (\SoapFault $exception) {
 
             FedexHelper::printFault($exception, $validateClient);
             return new JsonResponse(["status"=>500,"data" =>$exception],Response::HTTP_INTERNAL_SERVER_ERROR);
