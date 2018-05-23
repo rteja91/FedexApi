@@ -52,13 +52,13 @@ class FedexPickupServiceController extends Controller
 
 
             $postalResponse = $validateClient -> getPickupAvailability($FinalRequest);
-            dd($postalResponse);
+            //dd($postalResponse);
 
 
             if ($postalResponse -> HighestSeverity != 'FAILURE' && $postalResponse -> HighestSeverity != 'ERROR'){
 
                 FedexHelper::printSuccess($validateClient, $postalResponse);
-                return new JsonResponse(["status"=>200, "data" =>$postalResponse->AddressResults],Response::HTTP_OK);
+                return new JsonResponse(["status"=>200, "data" =>$postalResponse],Response::HTTP_OK);
 
             }else{
 
