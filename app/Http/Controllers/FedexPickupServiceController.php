@@ -31,62 +31,28 @@ class FedexPickupServiceController extends Controller
         $PickupServiceRequest['DispatchDate'] = $input->DispatchDate;
         $PickupServiceRequest['PackageReadyTime'] = $input->PackageReadyTime;
         $PickupServiceRequest['CustomerCloseTime'] = $input->CustomerCloseTime;
-        $PickupServiceRequest['Carriers'] =
+        $PickupServiceRequest['Carriers'] = $input->Carriers;
 
         return $PickupServiceRequest;
 
     }
 
-    2/22/
-
-
-    public function validatePostalAddress(Request $request){
-        //dd($request);
-
-        $TEST = array(
-            0 => array(
-                'ClientReferenceId' => 'ClientReferenceId1',
-                'Address' => array(
-                    'StreetLines' => array('100 Nickerson RD'),
-                    'PostalCode' => '01752',
-                    'City' => 'Marlborough',
-                    'StateOrProvinceCode' => 'MA',
-                    'CountryCode' => 'US'
-                )
-            ),
-            1 => array(
-                'ClientReferenceId' => 'ClientReferenceId2',
-                'Address' => array(
-                    'StreetLines' => array('167 PROSPECT HIGHWAY'),
-                    'City' => 'New SOUTH WALES',
-                    'PostalCode' => '2147',
-                    'CountryCode' => 'AU'
-                )
-            ),
-            2 => array(
-                'ClientReferenceId' => 'ClientReferenceId3',
-                'Address' => array(
-                    'StreetLines' => array('3 WATCHMOOR POINT', 'WATCHMOOR ROAD'),
-                    'PostalCode' => 'GU153AQ',
-                    'City' => 'CAMBERLEY',
-                    'CountryCode' => 'GB'
-                )
-            )
-        );
-
-        //dd(json_encode($request->AddressesToValidate));
 
 
 
-        $validateClient = FedexHelper::getSoapClient(AVSWSDL);
+    public function pickupServiceAvailability(Request $request){
+
+
+        $validateClient = FedexHelper::getSoapClient(PICKUPWSDL);
         $FinalRequest  = $this->buildRequest($request);
-        //dd($FinalRequest);
+        //print_r($FinalRequest);
+        //dd("echo");
         //dd($validateClient->__getFunctions());
         try {
 
 
-            $postalResponse = $validateClient -> addressValidation($FinalRequest);
-            //dd($postalResponse);
+            $postalResponse = $validateClient -> getPickupAvailability($FinalRequest);
+            dd($postalResponse);
 
 
             if ($postalResponse -> HighestSeverity != 'FAILURE' && $postalResponse -> HighestSeverity != 'ERROR'){
@@ -101,7 +67,8 @@ class FedexPickupServiceController extends Controller
 
             }
 
-        } catch (SoapFault $exception) {
+        } catch (\SoapFault $exception) {
+            dd($exception);
 
             FedexHelper::printFault($exception, $validateClient);
             return new JsonResponse(["status"=>500,"data" =>$exception],Response::HTTP_INTERNAL_SERVER_ERROR);

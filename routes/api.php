@@ -19,3 +19,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('validatepostalcode', 'FedexCountryServiceController@validatePostalCode');
 Route::post('validatepostaladdress','FedexAddressValidationController@validatePostalAddress');
+Route::post('pickupavailability','FedexPickupServiceController@pickupServiceAvailability');
