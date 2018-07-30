@@ -43,15 +43,118 @@ class FedexPickupServiceController extends Controller
     public function pickupServiceAvailability(Request $request){
 
 
+    $validateClient = FedexHelper::getSoapClient(PICKUPWSDL);
+    $FinalRequest  = $this->buildRequest($request);
+    //print_r($FinalRequest);
+    //dd("echo");
+    dd($validateClient->__getFunctions());
+    try {
+
+
+        $postalResponse = $validateClient -> getPickupAvailability($FinalRequest);
+        //dd($postalResponse);
+
+
+        if ($postalResponse -> HighestSeverity != 'FAILURE' && $postalResponse -> HighestSeverity != 'ERROR'){
+
+            FedexHelper::printSuccess($validateClient, $postalResponse);
+            return new JsonResponse(["status"=>200, "data" =>$postalResponse],Response::HTTP_OK);
+
+        }else{
+
+            FedexHelper::printError($validateClient, $postalResponse);
+            return new JsonResponse(["status"=>500,"data" =>$postalResponse],Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        }
+
+    } catch (\SoapFault $exception) {
+        //dd($exception);
+
+        FedexHelper::printFault($exception, $validateClient);
+        return new JsonResponse(["status"=>500,"data" =>$exception],Response::HTTP_INTERNAL_SERVER_ERROR);
+
+    }
+
+
+}
+    private function buildCreatePickupRequest($input){
+        $PickupRequest['WebAuthenticationDetail'] = FedexHelper::getWebAuthenticationDetail()['ucred'];
+        $PickupRequest['ClientDetail'] = FedexHelper::getClientDetail()['ClientDetail'];
+        $PickupRequest['TransactionDetail'] = FedexHelper::getTransactionDetail()['TransactionDetail'];
+        $PickupRequest['Version'] = $this->getVersion()['Version'];
+        $PickupRequest['OriginDetail'] = $input->OriginDetail;
+        $PickupRequest['PackageCount'] = $input->PackageCount;
+        $PickupRequest['TotalWeight'] =  $input->TotalWeight;
+        $PickupRequest['CarrierCode'] =  $input->CarrierCode;
+        $PickupRequest['CourierRemarks'] = $input->CourierRemarks;
+
+        return $PickupRequest;
+
+    }
+    public function createPickupService(Request $request){
+
+
         $validateClient = FedexHelper::getSoapClient(PICKUPWSDL);
-        $FinalRequest  = $this->buildRequest($request);
+        $FinalRequest  = $this->buildCreatePickupRequest($request);
+        //dd(json_encode($FinalRequest));
+        //dd("echo");
+        //dd($validateClient->__getFunctions());
+        try {
+
+
+            $postalResponse = $validateClient -> createPickup($FinalRequest);
+
+            //dd($postalResponse);
+
+
+            if ($postalResponse -> HighestSeverity != 'FAILURE' && $postalResponse -> HighestSeverity != 'ERROR'){
+
+                FedexHelper::printSuccess($validateClient, $postalResponse);
+                return new JsonResponse(["status"=>200, "data" =>$postalResponse],Response::HTTP_OK);
+
+            }else{
+
+                FedexHelper::printError($validateClient, $postalResponse);
+                return new JsonResponse(["status"=>500,"data" =>$postalResponse],Response::HTTP_INTERNAL_SERVER_ERROR);
+
+            }
+
+        } catch (\SoapFault $exception) {
+            dd($exception);
+
+            FedexHelper::printFault($exception, $validateClient);
+            return new JsonResponse(["status"=>500,"data" =>$exception],Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        }
+
+
+    }
+    private function buildCancelPickupRequest($input){
+        $CancelPickupRequest['WebAuthenticationDetail'] = FedexHelper::getWebAuthenticationDetail()['ucred'];
+        $CancelPickupRequest['ClientDetail'] = FedexHelper::getClientDetail()['ClientDetail'];
+        $CancelPickupRequest['TransactionDetail'] = FedexHelper::getTransactionDetail()['TransactionDetail'];
+        $CancelPickupRequest['Version'] = $this->getVersion()['Version'];
+        $CancelPickupRequest['CarrierCode'] = 'FDXE'; // valid values FDXE-Express, FDXG-Ground, etc
+        $CancelPickupRequest['PickupConfirmationNumber'] = getProperty('pickupconfirmationnumber'); // Replace 'XXX' with your Pickup confirmation number
+        $CancelPickupRequest['ScheduledDate'] = getProperty('pickupdate');
+        $CancelPickupRequest['Location'] = getProperty('pickuplocationid'); // Replace 'XXX' with your Pickip Loaction Code/ID
+        $CancelPickupRequest['CourierRemarks'] = 'Do not pickup.  This is a test';
+
+        return $CancelPickupRequest;
+
+    }
+    public function cancelPickupService(Request $request){
+
+
+        $validateClient = FedexHelper::getSoapClient(PICKUPWSDL);
+        $FinalRequest  = $this->buildCancelPickupRequest($request);
         //print_r($FinalRequest);
         //dd("echo");
         //dd($validateClient->__getFunctions());
         try {
 
 
-            $postalResponse = $validateClient -> getPickupAvailability($FinalRequest);
+            $postalResponse = $validateClient -> cancelPickup($FinalRequest);
             //dd($postalResponse);
 
 
